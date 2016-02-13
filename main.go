@@ -110,18 +110,13 @@ func (m *mPowerCollector) Collect(ch chan<- prometheus.Metric) {
 	}
 	defer resp.Body.Close()
 
-	data := make(map[string][]OutletData)
+	data := &struct{ Sensors []OutletData }{}
 	err = json.NewDecoder(resp.Body).Decode(data)
 	if err != nil {
 		log.Printf("Unable to parse data from device: %v", err)
 		return
 	}
-	outlets := data["sensors"]
-	if len(outlets) == 0 {
-		log.Println("Unable to see data from device")
-		return
-	}
-	for _, outlet := range outlets {
+	for _, outlet := range data.Sensors {
 		// Output      float64
 		// Power       float64
 		// Energy      float64
